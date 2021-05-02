@@ -4,6 +4,7 @@
   "description": "Graduation project backend server side",
   "main": "app.js",
   "dependencies": {
+    "compression": "^1.7.4",
     "dotenv": "^8.2.0",
     "eslint": "^7.24.0",
     "express": "^4.17.1",
