@@ -1,31 +1,22 @@
 const Item = require('./../models/itemModel');
+const APIFeatures = require('./../utils/apiFeatures');
+
+// aliasing but not yet uset //TODO:
+exports.aliasSales = (req, res, next) => {
+  req.query.sort = 'discount';
+  next();
+};
 
 exports.getAllItems = async (req, res) => {
   try {
-    // Building the query
-    // 1A)Filtering
-    const queryObj = { ...req.query }; // using destructring to get the queries data
-
-    const excludedFields = ['page', 'sort', 'limit', 'fields']; // Filtering queries
-    excludedFields.forEach((el) => delete queryObj[el]); // Excluding FIltering queries fields
-
-    // 1B) Advanced Filtering // TODO:  Not working
-    let queryString = JSON.stringify(queryObj);
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      (match) => `$${match}`
-    ); // Reqular expression to put the mongoDB $ sign
-
-    let query = Item.find(queryObj); // Getting the query without the filtering queries deleted in line 9
-
-    // 2) Sorting : a filtering query app
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' '); // To allow multiple sort conditions with (,)
-      query = query.sort(sortBy);
-    }
-
     // Execute the query after creating it in the above lines
-    const items = await query;
+    const features = new APIFeatures(Item.find(), req.query)
+      .filter()
+      .sort()
+      .paginate();
+
+    const items = await features.query;
+
     // Send responce
     res.status(200).json({
       status: 'success',
@@ -111,6 +102,43 @@ exports.deleteItem = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+// aggregation pipeline
+exports.getItemStats = async (req, res) => {
+  try {
+    const stats = await Item.aggregate([
+      {
+        $match: { price: { $gte: 100 } },
+      },
+      {
+        $group: {
+          _id: '$category', // for Men AND Women
+          numItems: { $sum: 1 }, // calculate number of items
+          avgPrice: { $avg: '$price' }, // calculate average items price
+          minPrice: { $min: '$price' }, // calculate minimum items price
+          maxPrice: { $max: '$price' }, // calculate maximum items price
+        },
+      },
+      {
+        $sort: { avgPrice: 1 }, // 1 for ascending order
+      },
+      // {
+      //   $match: {_id: { $ne:}}
+      // }
+    ]);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats,
+      },
+    });
+  } catch (err) {
     res.status(404).json({
       status: 'fail',
       message: err,
