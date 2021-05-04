@@ -21,8 +21,8 @@ class APIFeatures {
 
   sort() {
     if (this.queryString.sort) {
-      const sortBy = req.query.sort.split(',').join(' '); // To allow multiple sort conditions with (,)
-      this.query = query.sort(sortBy);
+      const sortBy = this.queryString.sort.split(',').join(' '); // To allow multiple sort conditions with (,)
+      this.query = this.query.sort(sortBy);
     }
     return this;
   }
