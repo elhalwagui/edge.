@@ -1,6 +1,7 @@
 const Item = require('./../models/itemModel');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
 
 // aliasing but not yet uset //TODO:
 exports.aliasSales = (req, res, next) => {
@@ -28,9 +29,12 @@ exports.getAllItems = catchAsync(async (req, res, next) => {
 });
 
 exports.getItem = catchAsync(async (req, res, next) => {
-  console.log(req.params.id);
+  // console.log(req.params.id);
   const item = await Item.findById(req.params.id);
 
+  if (!item) {
+    return next(new AppError('No item found with that ID', 404));
+  }
   res.status(200).json({
     status: 'success',
     data: {
@@ -55,6 +59,10 @@ exports.updateItem = catchAsync(async (req, res, next) => {
     new: true, // the new updated document is the one to be returend
     runValidators: true,
   });
+
+  if (!item) {
+    return next(new AppError('No item found with that ID', 404));
+  }
   // console.log(item);
   res.status(200).json({
     status: 'success',
@@ -66,6 +74,10 @@ exports.updateItem = catchAsync(async (req, res, next) => {
 
 exports.deleteItem = catchAsync(async (req, res, next) => {
   const item = await Item.findByIdAndDelete(req.params.id);
+  if (!item) {
+    return next(new AppError('No item found with that ID', 404));
+  }
+
   res.status(204).json({
     status: 'success',
     data: null,
