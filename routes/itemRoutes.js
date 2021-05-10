@@ -1,6 +1,7 @@
 const express = require('express');
-const Item = require('../models/itemModel');
+// const Item = require('../models/itemModel');
 const router = express.Router();
+const authController = require('./../controllers/authController');
 
 const itemController = require('./../controllers/itemController');
 
@@ -13,7 +14,7 @@ router.route('/item-stats').get(itemController.getItemStats);
 
 router
   .route('/')
-  .get(itemController.getAllItems)
+  .get(authController.protect, itemController.getAllItems)
   .post(itemController.createItem);
 
 router
