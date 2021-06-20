@@ -17,15 +17,16 @@ exports.getAllItems = catchAsync(async (req, res, next) => {
     .paginate();
 
   const items = await features.query;
-
-  // Send responce
-  res.status(200).json({
-    status: 'success',
-    results: items.length,
-    data: {
-      items,
-    },
-  });
+  ~(
+    // Send responce
+    res.status(200).json({
+      status: 'success',
+      results: items.length,
+      data: {
+        items,
+      },
+    })
+  );
 });
 
 exports.getItem = catchAsync(async (req, res, next) => {
