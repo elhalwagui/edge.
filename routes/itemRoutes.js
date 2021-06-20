@@ -14,7 +14,7 @@ router.route('/item-stats').get(itemController.getItemStats);
 
 router
   .route('/')
-  .get(authController.protect, itemController.getAllItems)
+  .get(itemController.getAllItems)
   .post(itemController.createItem);
 
 router
